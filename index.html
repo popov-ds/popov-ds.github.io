@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Сайт разработчика мобильных приложений" />
+  <title>Мобильные приложения</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --text: #1a1a1a;
+      --muted: #555;
+      --link: #0066cc;
+      --card: #f5f5f5;
+      --border: #ddd;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --text: #eee;
+        --muted: #aaa;
+        --link: #6db3f2;
+        --card: #1e1e1e;
+        --border: #333;
+      }
+    }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+    max-width: 42rem;
+    margin: 0 auto;
+    padding: 2rem 1rem 3rem;
+    color: var(--text);
+  }
+  header { margin-bottom: 2rem; }
+  h1 { font-size: 1.75rem; margin: 0 0 0.25rem; }
+  .tagline { color: var(--muted); margin: 0; }
+  .contact { margin-top: 1rem; font-size: 0.95rem; }
+  a { color: var(--link); }
+  h2 { font-size: 1.1rem; margin: 0 0 1rem; font-weight: 600; }
+  .apps { display: flex; flex-direction: column; gap: 1rem; list-style: none; padding: 0; margin: 0; }
+  .app {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.15rem;
+    background: var(--card);
+  }
+  .app h3 { margin: 0 0 0.35rem; font-size: 1.15rem; }
+  .app p { margin: 0 0 0.75rem; color: var(--muted); font-size: 0.95rem; }
+  .stores { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin: 0; padding: 0; list-style: none; }
+  .stores a { font-size: 0.95rem; }
+  footer { margin-top: 2.5rem; font-size: 0.85rem; color: var(--muted); }
+  .error { color: #c00; }
+    </style>
+</head>
+<body>
+  <header id="header">
+    <h1>Загрузка…</h1>
+  </header>
+
+  <section aria-labelledby="apps-heading">
+    <h2 id="apps-heading">Приложения</h2>
+    <ul class="apps" id="apps"></ul>
+  </section>
+
+  <footer>
+    <p>Официальный сайт разработчика для карточек в магазинах приложений.</p>
+  </footer>
+
+  <!-- Копия apps.json: при правке списка обновляйте оба файла (или смотрите только через http/https). -->
+  <script type="application/json" id="apps-data">
+{
+  "developer": {
+    "title": "Мобильные приложения",
+    "tagline": "Android-приложения для RuStore и Google Play",
+    "contactEmail": "popov.dmitriy.s@yandex.ru"
+  },
+  "apps": [
+    {
+      "name": "Yoga Scheduler",
+      "description": "Планировщик занятий по йоге: сессии, асаны из каталога, экспорт плана.",
+      "stores": [
+        {
+          "label": "RuStore",
+          "url": "https://www.rustore.ru/catalog/app/2063769856"
+        }
+      ]
+    }
+  ]
+}
+  </script>
+
+  <script>
+    (function () {
+      var appsEl = document.getElementById("apps");
+      var headerEl = document.getElementById("header");
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function renderApp(app) {
+        var stores = (app.stores || [])
+          .filter(function (s) { return s && s.url; })
+          .map(function (s) {
+            var label = escapeHtml(s.label || "Скачать");
+            var url = escapeHtml(s.url);
+            return '<li><a href="' + url + '" rel="noopener noreferrer">' + label + "</a></li>";
+          })
+          .join("");
+
+        return (
+          '<li class="app">' +
+          "<h3>" + escapeHtml(app.name) + "</h3>" +
+          "<p>" + escapeHtml(app.description || "") + "</p>" +
+          (stores ? '<ul class="stores">' + stores + "</ul>" : "") +
+          "</li>"
+        );
+      }
+
+      function readEmbedded() {
+        var el = document.getElementById("apps-data");
+        return JSON.parse(el.textContent);
+      }
+
+      function loadSiteData() {
+        var online = location.protocol === "http:" || location.protocol === "https:";
+        if (!online) {
+          return Promise.resolve(readEmbedded());
+        }
+        return fetch("apps.json", { cache: "no-cache" })
+          .then(function (r) {
+            if (!r.ok) throw new Error("apps.json");
+            return r.json();
+          })
+          .catch(function () {
+            return readEmbedded();
+          });
+      }
+
+      function render(data) {
+          var dev = data.developer || {};
+          document.title = dev.title || "Мобильные приложения";
+
+          var contact = dev.contactEmail
+            ? '<p class="contact">Контакт: <a href="mailto:' + escapeHtml(dev.contactEmail) + '">' +
+              escapeHtml(dev.contactEmail) + "</a></p>"
+            : "";
+
+          headerEl.innerHTML =
+            "<h1>" + escapeHtml(dev.title || "Мобильные приложения") + "</h1>" +
+            (dev.tagline ? '<p class="tagline">' + escapeHtml(dev.tagline) + "</p>" : "") +
+            contact;
+
+          var apps = data.apps || [];
+          if (apps.length === 0) {
+            appsEl.innerHTML = "<li><p class=\"error\">Список приложений пуст. Добавьте записи в apps.json.</p></li>";
+            return;
+          }
+          appsEl.innerHTML = apps.map(renderApp).join("");
+      }
+
+      loadSiteData()
+        .then(render)
+        .catch(function () {
+          headerEl.innerHTML = "<h1>Мобильные приложения</h1>";
+          appsEl.innerHTML =
+            '<li><p class="error">Не удалось прочитать данные. Проверьте apps.json и блок #apps-data.</p></li>';
+        });
+    })();
+  </script>
+</body>
+</html>
