@@ -1,0 +1,19 @@
+{
+  "developer": {
+    "title": "Мобильные приложения",
+    "tagline": "Android-приложения для RuStore и Google Play",
+    "contactEmail": "popov.dmitriy.s@yandex.ru"
+  },
+  "apps": [
+    {
+      "name": "Yoga Scheduler",
+      "description": "Планировщик занятий по йоге: сессии, асаны из каталога, экспорт плана.",
+      "stores": [
+        {
+          "label": "RuStore",
+          "url": "https://www.rustore.ru/catalog/app/2063769856"
+        }
+      ]
+    }
+  ]
+}
