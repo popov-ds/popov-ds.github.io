@@ -14,6 +14,16 @@
           "url": "https://www.rustore.ru/catalog/app/2063769856"
         }
       ]
+    },
+	{
+      "name": "Sutra",
+      "description": "Специализированная мобильная CRM-система для предпринимателей в сфере сетевого бизнеса.",
+      "stores": [
+        {
+          "label": "RuStore",
+          "url": "https://www.rustore.ru/catalog/app/com.popov_ds.yogascheduler"
+        }
+      ]
     }
   ]
 }
